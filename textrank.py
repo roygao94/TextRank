@@ -67,6 +67,16 @@ def buildGraph(nodes):
 
     return gr
 
+def build_co_occurrence_graph(word_list, window_size=2):
+    gr = nx.Graph()
+
+    for i in range(len(word_list) - window_size + 1):
+        node_pairs = list(itertools.combinations(word_list[i:i + window_size], 2))
+        for pair in node_pairs:
+            gr.add_edge(pair[0], pair[1], weight=1.0)
+
+    return gr
+
 def extractKeyphrases(text):
     #tokenize the text using nltk
     wordTokens = nltk.word_tokenize(text)
@@ -84,6 +94,7 @@ def extractKeyphrases(text):
    #this will be used to determine adjacent words in order to construct keyphrases with two words
 
     graph = buildGraph(word_set_list)
+    # graph = build_co_occurrence_graph([x[0] for x in tagged])
 
     #pageRank - initial value of 1.0, error tolerance of 0,0001, 
     calculated_page_rank = nx.pagerank(graph, weight='weight')
@@ -156,13 +167,13 @@ def writeFiles(summary, keyphrases, fileName):
 
     print "-"
 
-
-#retrieve each of the articles
-articles = os.listdir("articles")
-for article in articles:
-    print 'Reading articles/' + article
-    articleFile = io.open('articles/' + article, 'r')
-    text = articleFile.read()
-    keyphrases = extractKeyphrases(text)
-    summary = extractSentences(text)
-    writeFiles(summary, keyphrases, article)
+if __name__ == '__main__':
+    #retrieve each of the articles
+    articles = os.listdir("articles")
+    for article in articles:
+        print 'Reading articles/' + article
+        articleFile = io.open('articles/' + article, 'r')
+        text = articleFile.read()
+        keyphrases = extractKeyphrases(text)
+        summary = extractSentences(text)
+        writeFiles(summary, keyphrases, article)
